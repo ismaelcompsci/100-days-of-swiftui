@@ -52,11 +52,11 @@ class Expenses {
 }
 
 struct ContentView: View {
-    @State private var showingAddExpense = false
+    @State private var path = NavigationPath()
     @State private var expenses = Expenses()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             VStack {
                 VStack {
                     Text("Business Expenses")
@@ -108,14 +108,16 @@ struct ContentView: View {
             }
             .navigationTitle("iExpense")
             .toolbar {
-                Button("Add expense", systemImage: "plus") {
-                    showingAddExpense = true
-                }
+                ToolbarItemGroup(placement: .automatic) {
+                    Button("Add expense", systemImage: "plus") {
+                        path.append("expense")
+                    }
 
-                EditButton()
+                    EditButton()
+                }
             }
-            .sheet(isPresented: $showingAddExpense) {
-                AddView(expenses: expenses)
+            .navigationDestination(for: String.self) { _ in
+                AddView(path: $path, expenses: expenses)
             }
         }
     }

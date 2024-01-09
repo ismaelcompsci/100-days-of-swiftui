@@ -8,33 +8,34 @@
 import SwiftUI
 
 struct AddView: View {
-    @Environment(\.dismiss) var dismiss
-    
-    @State private var name = ""
+    @State private var name = "Expense name"
     @State private var type = "Personal"
     @State private var amount = 0.0
+    
+    @Binding var path: NavigationPath
     
     var expenses: Expenses
     
     let types = ["Business", "Personal"]
     
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Name", text: $name)
+        Form {
+//            TextField("Name", text: $name)
                 
-                Picker("Type", selection: $type) {
-                    ForEach(types, id: \.self) {
-                        Text($0)
-                    }
+            Picker("Type", selection: $type) {
+                ForEach(types, id: \.self) {
+                    Text($0)
                 }
-                
-                TextField("Amount", value: $amount, format: .currency(code: "USD"))
-                    .keyboardType(.decimalPad)
             }
+                
+            TextField("Amount", value: $amount, format: .currency(code: "USD"))
+                .keyboardType(.decimalPad)
+        }
             
-            .navigationTitle("Add new expenses")
-            .toolbar {
+        .navigationTitle($name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(id: "options") {
+            ToolbarItem(id: "save", placement: .confirmationAction) {
                 Button("Save") {
                     let item = ExpenseItem(name: name, type: type, amount: amount)
                     if type == "Personal" {
@@ -42,13 +43,22 @@ struct AddView: View {
                     } else {
                         expenses.businessItems.append(item)
                     }
-                    dismiss()
+                    
+                    path = NavigationPath()
+                }
+            }
+            ToolbarItem(id: "cancel", placement: .cancellationAction) {
+                Button("Cancel", role: .cancel) {
+                    path = NavigationPath()
                 }
             }
         }
+        .navigationBarBackButtonHidden()
     }
 }
 
 #Preview {
-    AddView(expenses: Expenses())
+    @State var path = NavigationPath()
+    
+    return AddView(path: $path, expenses: Expenses())
 }
